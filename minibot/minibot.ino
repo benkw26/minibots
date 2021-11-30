@@ -2,9 +2,7 @@
 #include <HCSR04.h>
 #include <Wire.h>
 #include <LIDARLite.h>
-
-//useful commands:
-
+#include "Adafruit_TCS34725.h"
 
 #define AIN1 2
 #define BIN1 7
@@ -22,28 +20,38 @@ const int echoPin = 12; // Echo Pin of Ultrasonic Sensor
 Motor motor1 = Motor(AIN1, AIN2, PWMA, offsetA, STBY);
 Motor motor2 = Motor(BIN1, BIN2, PWMB, offsetB, STBY);
 LIDARLite myLidarLite;
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
+
 
 long microsecondsToCentimeters(long microseconds) {
    return microseconds / 29 / 2;
 }
 
-void forward(int duration)
+int forward(int duration)
 { 
-  unsigned long initial_time = millis();
-  motor1.drive(50);
-  motor2.drive(208);
-  delay(150);
+  long initial_time = millis();
+  if(is_robot() == false){
+    motor1.drive(50);
+    motor2.drive(150);
+    delay(50);
+  }
   while((millis() - initial_time) < duration){
+    //Serial.println((millis() - initial_time));
     if(is_robot() == false){
       motor1.drive(255);
       motor2.drive(208);
     }else{
       br();
-      delay(500);
-      forward(duration - (millis() - initial_time));
+      delay(2000);
+      Serial.println(duration);
+      Serial.println(millis() - initial_time);
+      Serial.println(duration + 2150 - (millis() - initial_time));
+      forward(duration + 2003 - (millis() - initial_time));
       
     }
   }
+  br();
+  return 0;
 }
 
 void turn_around_left(){
@@ -117,7 +125,7 @@ int distance_laser()
 }
 
 bool is_robot(){
-  if(distance_sonic() < 10){
+  if(distance_sonic() < 30){
     return true;
   }else{
     return false;
@@ -147,6 +155,24 @@ void loop()
 //    dumb_way();
 //    delay(5000);
 //  }
-   forward(10000);
+//  motor1.drive(100);
+//  motor2.drive(100);
+//  delay(100000);
+//  forward(2000);
+//  delay(5000);
+
+uint16_t r, g, b, c, colorTemp, lux;
+ 
+tcs.getRawData(&r, &g, &b, &c);
+colorTemp = tcs.calculateColorTemperature(r, g, b);
+lux = tcs.calculateLux(r, g, b);
+   
+  Serial.print("Color Temp: "); Serial.print(colorTemp, DEC); Serial.print(" K - ");
+  Serial.print("Lux: "); Serial.print(lux, DEC); Serial.print(" - ");
+  Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
+  Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
+  Serial.print("B: "); Serial.print(b, DEC); Serial.print(" ");
+  Serial.print("C: "); Serial.print(c, DEC); Serial.print(" ");
+  Serial.println(" ");
 
 }
