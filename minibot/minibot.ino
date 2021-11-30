@@ -27,63 +27,59 @@ long microsecondsToCentimeters(long microseconds) {
    return microseconds / 29 / 2;
 }
 
-void forward(int t)
+void forward(int duration)
 { 
-  motor1.drive(255);
+  unsigned long initial_time = millis();
+  motor1.drive(50);
   motor2.drive(208);
-  delay(t);
-  br();
-}
-
-void center()
-{
-  forward(3000);
+  delay(150);
+  while((millis() - initial_time) < duration){
+    if(is_robot() == false){
+      motor1.drive(255);
+      motor2.drive(208);
+    }else{
+      br();
+      delay(500);
+      forward(duration - (millis() - initial_time));
+      
+    }
+  }
 }
 
 void turn_around_left(){
-  motor1.drive(232);
-  delay(1000);
+  motor1.drive(186);
+  delay(1200);
   motor1.brake();
 }
 
 void turn_around_right(){
-  motor2.drive(208);
-  delay(1000);
+  motor2.drive(162);
+  delay(1200);
   motor2.brake();
 }
 
 void left90(){
-  motor1.drive(200);
-  delay(1000);
+  motor1.drive(155);
+  delay(800);
   motor1.brake();
 }
 
-//void dumb_way(){
-//  center();
-//  left90();
-//  forward();
-//  for(int i = 0; i < 8; i++){
-//    if((i % 2) == 0){
-//      turn_around_left();
-//      forward();
-//    }else{
-//      turn_around_right();
-//      forward();
-//    }
-//  }
-//  turn_around_left();
-//  forward();
-//
-//  
-//}
+void dumb_way(){
+  forward(3000);
+  left90();
+  forward(1500);
+  for(int i = 0; i < 8; i++){
+    if((i % 2) == 0){
+      turn_around_left();
+      forward(3000);
+    }else{
+      turn_around_right();
+      forward(3000);
+    }
+  }
+  turn_around_left();
+  forward(1500);
 
-void sweep()
-{
-  
-}
-
-void rotate()
-{
   
 }
 
@@ -93,20 +89,20 @@ void br()
   motor2.brake();
 }
 
-void return1()
+void spiral(int t)
 {
-  
+  motor1.drive(186);
+  motor2.drive(50);
+  delay(t);
 }
 
 float distance_sonic(){
    long duration, inches, cm;
-   pinMode(pingPin, OUTPUT);
    digitalWrite(pingPin, LOW);
    delayMicroseconds(2);
    digitalWrite(pingPin, HIGH);
    delayMicroseconds(10);
    digitalWrite(pingPin, LOW);
-   pinMode(echoPin, INPUT);
    duration = pulseIn(echoPin, HIGH);
    return microsecondsToCentimeters(duration);
 }
@@ -120,8 +116,12 @@ int distance_laser()
   }
 }
 
-void is_robot(){
- 
+bool is_robot(){
+  if(distance_sonic() < 10){
+    return true;
+  }else{
+    return false;
+  }
 }
 
 void detect_block()
@@ -132,22 +132,21 @@ void detect_block()
 void setup()
 {
   Serial.begin(115200);
+  
   myLidarLite.begin();
   myLidarLite.beginContinuous();
   pinMode(3, INPUT);
+  pinMode(pingPin, OUTPUT);
+  pinMode(echoPin, INPUT);
 }
 
 
 void loop()
-{   
-  //forward(2000);
-  //delay(5000);
-  
-// turn_around_left();
-// delay(2000);
-// turn_around_right();
-// delay(2000);
-  Serial.println(distance_sonic());
-  delay(1000);
+{ 
+//  if(distance_sonic() < 5){
+//    dumb_way();
+//    delay(5000);
+//  }
+   forward(10000);
 
 }
