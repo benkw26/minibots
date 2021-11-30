@@ -33,7 +33,7 @@ int forward(int duration)
   if(is_robot() == false){
     motor1.drive(50);
     motor2.drive(150);
-    delay(50);
+    delay(25);
   }
   while((millis() - initial_time) < duration){
     //Serial.println((millis() - initial_time));
@@ -55,20 +55,20 @@ int forward(int duration)
 }
 
 void turn_around_left(){
-  motor1.drive(186);
+  motor1.drive(210);
   delay(1200);
   motor1.brake();
 }
 
 void turn_around_right(){
-  motor2.drive(162);
-  delay(1200);
+  motor2.drive(150);
+  delay(1000);
   motor2.brake();
 }
 
 void left90(){
   motor1.drive(155);
-  delay(800);
+  delay(1150);
   motor1.brake();
 }
 
@@ -97,12 +97,28 @@ void br()
   motor2.brake();
 }
 
-void spiral(int t)
+void spiral(int t=0)
 {
-  motor1.drive(186);
-  motor2.drive(50);
-  delay(t);
+  unsigned long long startMillis = millis();
+  unsigned long long currentMillis = millis();
+  unsigned long long dMillis = currentMillis-startMillis;
+  while (dMillis < t || t == 0) {
+    currentMillis = millis();
+    dMillis = currentMillis-startMillis;
+    motor1.drive(240); //to 208
+    int spd = floor(75*pow(1.05,floor(dMillis/1000)));
+    if(spd>200){
+      spd = 200;
+    }
+    motor2.drive(spd);
+  }
+  motor1.brake(); motor2.brake();
 }
+
+//int spiral_lim(int dMillis) {
+//  int k = 10000
+//  if (
+//}
 
 float distance_sonic(){
    long duration, inches, cm;
@@ -137,20 +153,18 @@ void detect_block()
   
 }
 
-void setup()
-{
+void setup(){
   Serial.begin(115200);
-  
   myLidarLite.begin();
   myLidarLite.beginContinuous();
   pinMode(3, INPUT);
   pinMode(pingPin, OUTPUT);
   pinMode(echoPin, INPUT);
+  
 }
 
 
-void loop()
-{ 
+void loop(){ 
 //  if(distance_sonic() < 5){
 //    dumb_way();
 //    delay(5000);
@@ -161,18 +175,10 @@ void loop()
 //  forward(2000);
 //  delay(5000);
 
-uint16_t r, g, b, c, colorTemp, lux;
- 
-tcs.getRawData(&r, &g, &b, &c);
-colorTemp = tcs.calculateColorTemperature(r, g, b);
-lux = tcs.calculateLux(r, g, b);
-   
-  Serial.print("Color Temp: "); Serial.print(colorTemp, DEC); Serial.print(" K - ");
-  Serial.print("Lux: "); Serial.print(lux, DEC); Serial.print(" - ");
-  Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
-  Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
-  Serial.print("B: "); Serial.print(b, DEC); Serial.print(" ");
-  Serial.print("C: "); Serial.print(c, DEC); Serial.print(" ");
-  Serial.println(" ");
+//uint16_t r, g, b, c, colorTemp, lux;
+// 
+//tcs.getRawData(&r, &g, &b, &c);
+  dumb_way();
+  delay(10000);
 
 }
