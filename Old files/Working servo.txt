@@ -1,0 +1,17 @@
+
+#include <Servo.h>
+Servo myservo;
+
+void setup(){
+  myservo.attach(11);
+  myservo.write(0);// move servos to center position -> 90°
+  Serial.begin(9600);
+  Serial.println("hello world");
+} 
+void loop(){
+  myservo.write(0);// move servos to center position -> 90°
+  delay(2000);
+  myservo.write(180);
+  delay(2000);
+  Serial.println("One cycle complete");
+}
